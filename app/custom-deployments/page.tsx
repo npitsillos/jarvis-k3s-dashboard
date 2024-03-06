@@ -43,7 +43,7 @@ export default async function Deployments() {
             ([namespace, ingressHostNames]) => {
               return ingressHostNames.map(function (ingressHostName: string) {
                 return (
-                  <Card className="w-[250px]">
+                  <Card key={ingressHostName} className="w-[250px]">
                     <CardHeader>
                       <CardTitle className="flex gap-x-4">
                         <Image

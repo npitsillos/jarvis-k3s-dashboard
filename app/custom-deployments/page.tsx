@@ -1,27 +1,19 @@
-import { getIngresses } from "@/lib/k8s-client"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
 
-const NAMESPACES: string[] = ["homeassistant", "longhorn-system"]
 const IMAGES: { [key: string]: string } = {
   code: "/vscode.svg",
   longhorn: "/longhorn.svg",
   home: "/homeassistant.png",
+  immich: "/immich.png",
 }
 
 export default async function Deployments() {
-  const namespacedIngresses = await getIngresses(NAMESPACES)
-
+  const res = await fetch("http://localhost:3000/api/custom-deployments")
+  const namespacedIngresses: { [key: string]: string[] } = await res.json()
   const ingressToIcon: { [key: string]: string } = {}
-  Object.entries(namespacedIngresses).map(([namespace, ingressHostNames]) => {
-    console.log(ingressHostNames)
+  Object.entries(namespacedIngresses).map(([_, ingressHostNames]) => {
     ingressHostNames.forEach(function (ingressHostName) {
       Object.entries(IMAGES).map(([dep, image]) => {
         if (ingressHostName.split(".")[0].includes(dep)) {
@@ -43,24 +35,25 @@ export default async function Deployments() {
             ([namespace, ingressHostNames]) => {
               return ingressHostNames.map(function (ingressHostName: string) {
                 return (
-                  <Card key={ingressHostName} className="w-[250px]">
-                    <CardHeader>
-                      <CardTitle className="flex gap-x-4">
-                        <Image
-                          src={ingressToIcon[ingressHostName]}
-                          width={40}
-                          height={40}
-                          alt="Jarvis logo"
-                        />
-                        {namespace}
-                      </CardTitle>
-                      <CardDescription>
-                        <Link href={"https://".concat(ingressHostName)}>
-                          {ingressHostName}
-                        </Link>
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
+                  <Link
+                    href={"https://".concat(ingressHostName)}
+                    key={ingressHostName}
+                  >
+                    <Card key={ingressHostName} className="w-[250px]">
+                      <CardHeader>
+                        <CardTitle className="flex gap-x-4">
+                          <Image
+                            className="h-8 w-8 object-contain rounded"
+                            src={ingressToIcon[ingressHostName]}
+                            width={40}
+                            height={40}
+                            alt={ingressHostName}
+                          />
+                          {namespace}
+                        </CardTitle>
+                      </CardHeader>
+                    </Card>
+                  </Link>
                 )
               })
             }

@@ -3,6 +3,7 @@ import { MoonIcon, SunIcon } from "@radix-ui/react-icons"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -33,7 +34,17 @@ function JarvisLogoButton({ theme }: { theme: string | undefined }) {
 }
 
 export default function Dashboard({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
+
   return (
     <>
       <div className="border-b">
@@ -42,7 +53,9 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Dashboard</NavigationMenuTrigger>
+                <NavigationMenuTrigger>
+                  <Link href="/">Dashboard</Link>
+                </NavigationMenuTrigger>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuTrigger>

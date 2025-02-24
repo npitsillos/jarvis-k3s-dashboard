@@ -1,6 +1,8 @@
 import * as k8s from "@kubernetes/client-node"
 import convert from "convert"
 
+import { Pod } from "@/types"
+
 const kc = new k8s.KubeConfig()
 kc.loadFromDefault()
 
@@ -48,6 +50,10 @@ export async function getIngresses() {
 export async function getClusterBasicInfo() {
   const topNodes = await k8s.topNodes(k8sCoreApi)
   const numNodes = topNodes.length
+  const numReadyNodes = topNodes.map(item => item.Node.status?.conditions?.filter(condItem => 
+    condItem.reason == 'KubeletReady' &&
+    condItem.status == 'True'
+  )).length
   const [cpuUsage, totalCPU, memoryUsage, totalMemory] = getCPUAndMemoryInfo(topNodes.map(item => (
     {
         memory: item.Memory,
@@ -55,7 +61,10 @@ export async function getClusterBasicInfo() {
     }
   )))
   return {
-    nodes: numNodes,
+    nodes: {
+      total: numNodes,
+      used: numReadyNodes,
+    },
     memory: {
         total: Math.round(totalMemory * 100) / 100,
         used: Math.round(memoryUsage * 100) / 100,
@@ -76,4 +85,9 @@ function getCPUAndMemoryInfo(topNodesCPU: Array<{cpu: k8s.ResourceUsage, memory:
         totalMemory += Number(nodeInfo.memory.Capacity)
     }
     return [cpuUsage, totalCPU, convert(memoryUsage, "bytes").to("GiB"), convert(totalMemory, "bytes").to("GiB")]
+}
+
+export async function getPodsInfo() :Promise<Pod[]> {
+  const pods = await k8sCoreApi.listPodForAllNamespaces()
+  return pods.body.items.map<Pod>(item => ({name: item.metadata?.name!, namespace: item.metadata?.namespace!}))
 }

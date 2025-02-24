@@ -10,6 +10,7 @@ import {
 import {
     Card,
     CardContent,
+    CardFooter
   } from "@/components/ui/card"
 import { ChartConfig, ChartContainer } from "@/components/ui/chart"
 
@@ -37,10 +38,7 @@ function getChartData(resource: string, num: number) {
     ]
 }
 
-function getEndAngle(resource: string, info: {total: number, used?: number}) {
-    if (resource === "nodes") {
-        return -180
-    }
+function getEndAngle(info: {total: number, used?: number}) {
     return  180 - ((360 / info.total) * (info.used ?? 0))
 }
 
@@ -56,13 +54,13 @@ export default function Radial({resource, info}: Props) {
           <RadialBarChart
             data={getChartData(resource, info.total)}
             startAngle={180}
-            endAngle={getEndAngle(resource, info)}
+            endAngle={getEndAngle(info)}
             innerRadius={80}
             outerRadius={110}
           >
             <PolarGrid
                 gridType="circle"
-                radialLines={true}
+                radialLines={false}
                 stroke="none"
                 className="first:fill-muted last:fill-background"
                 polarRadius={[86, 74]}
@@ -82,16 +80,16 @@ export default function Radial({resource, info}: Props) {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-4xl font-bold"
+                          className="fill-foreground text-4xl"
                         >
-                          {info.total}
+                          {Math.round((info.used / info.total) * 100)}%
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          { resource.charAt(0).toUpperCase() + resource.slice(1) }
+                          {(resource == 'nodes' ? 'Ready' : 'Used') + ' ' + resource.charAt(0).toUpperCase() + resource.slice(1)}
                         </tspan>
                       </text>
                     )

@@ -1,10 +1,14 @@
 import Radial from "@/components/charts/Radial"
+import { DataTable } from "@/components/table/table"
+import { columns } from "@/components/table/columns"
 
 export default async function Home() {
   const nodeInfo = await (await fetch("http://localhost:3000/api/metrics")).json()
-  console.log(nodeInfo)
+  const podInfo = await (await fetch("http://localhost:3000/api/pods")).json()
+  console.log(podInfo)
   return (
-    <div className="flex flex-row justify-between">
+    <>
+    <div className="flex flex-row justify-center">
         <Radial
             resource="CPU"
             info={nodeInfo.cpu}
@@ -15,8 +19,12 @@ export default async function Home() {
         />
         <Radial
             resource="nodes"
-            info={{total: nodeInfo.nodes}}
+            info={nodeInfo.nodes}
         />
     </div>
+    <div className="container mx-auto py-10">
+        <DataTable columns={columns} data={podInfo}/>
+    </div>
+    </>
   )
 }

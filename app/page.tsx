@@ -5,7 +5,6 @@ import { columns } from "@/components/table/columns"
 export default async function Home() {
   const nodeInfo = await (await fetch("http://localhost:3000/api/metrics")).json()
   const podInfo = await (await fetch("http://localhost:3000/api/pods")).json()
-  console.log(podInfo)
   return (
     <>
     <div className="flex flex-row justify-center">

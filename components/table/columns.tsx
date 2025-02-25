@@ -10,5 +10,17 @@ export const columns: ColumnDef<Pod>[] = [
     {
         accessorKey: "namespace",
         header: "Namespace",
+    },
+    {
+        accessorKey: "node",
+        header: "Node"
+    },
+    {
+        accessorKey: "cpuUsage",
+        header: "CPU (cores)"
+    },
+    {
+        accessorKey: "memoryUsage",
+        header: "Memory (GiB)"
     }
 ]

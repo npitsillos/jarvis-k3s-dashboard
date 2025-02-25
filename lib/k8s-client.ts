@@ -2,6 +2,8 @@ import * as k8s from "@kubernetes/client-node"
 import convert from "convert"
 
 import { Pod } from "@/types"
+import { round } from "@/lib/utils"
+
 
 const kc = new k8s.KubeConfig()
 kc.loadFromDefault()
@@ -66,12 +68,12 @@ export async function getClusterBasicInfo() {
       used: numReadyNodes,
     },
     memory: {
-        total: Math.round(totalMemory * 100) / 100,
-        used: Math.round(memoryUsage * 100) / 100,
+        total: totalMemory,
+        used: memoryUsage,
     },
     cpu: {
         total: totalCPU,
-        used: Math.round(cpuUsage * 100) / 100
+        used: cpuUsage
     }
   }
 }
@@ -88,6 +90,12 @@ function getCPUAndMemoryInfo(topNodesCPU: Array<{cpu: k8s.ResourceUsage, memory:
 }
 
 export async function getPodsInfo() :Promise<Pod[]> {
-  const pods = await k8sCoreApi.listPodForAllNamespaces()
-  return pods.body.items.map<Pod>(item => ({name: item.metadata?.name!, namespace: item.metadata?.namespace!}))
+  const pods = await k8s.topPods(k8sCoreApi, k8sMetricsApi)
+  return pods.map<Pod>(pod => ({
+    name: pod.Pod.metadata?.name!,
+    namespace: pod.Pod.metadata?.namespace!,
+    node: pod.Pod.spec?.nodeName!,
+    cpuUsage: round((Number(pod.CPU.CurrentUsage) * 1000)) ,
+    memoryUsage: round(convert(Number(pod.Memory.CurrentUsage), "bytes").to("GiB"))
+  }))
 }
